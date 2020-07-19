@@ -141,7 +141,7 @@ void displayList2()
 void ekle(int t,int s)
 {
 	int i;
-	struct node *tutucu=NULL,*tmp=NULL,*gonderici=NULL;
+	struct node *tutucu=NULL,*tmp=NULL;
 	tmp=stnode;
 	while (tmp != NULL)
 	{
