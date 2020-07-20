@@ -11,10 +11,11 @@ void createNodeList(int n);
 void displayList();         
 struct node *search(int);
 void degistir(struct node *);
-void displayList2();
+void ekle(int,int);
+void sil(int);
 int main()
 {
-    int n,a;
+    int n,a,x,y,z;
     
 		printf("\n\n Linked List : To create and display Singly Linked List :\n");
 		printf("-------------------------------------------------------------\n");
@@ -26,10 +27,19 @@ int main()
     displayList();
     printf("\n aramak istediginiz sayiyi giriniz :\n");
     scanf("%d",&a);
-    printf("\n aramak istediginiz sayi:%p\n",search(a));
     struct node *temp=search(a);
     degistir(temp);
-    displayList2();
+    displayList();
+    printf("\n eklemek istediginiz sayiyi giriniz :\n");
+    scanf("%d",&x);
+    printf("\n hangi sayidan sonra eklenecek :\n");
+    scanf("%d",&y);
+    ekle(x,y);
+    displayList();
+    printf("silmek istediginiz sayiyi giriniz:");
+    scanf("%d",&z);
+    sil(z);
+    displayList(); 
     return 0;
 }
 void createNodeList(int n)
@@ -95,7 +105,6 @@ struct node *search(int a)
 {	
 	struct node *temp=NULL; 
 	temp = stnode;		
-	
 	while (temp != NULL)   
 	{
 	
@@ -115,20 +124,53 @@ void degistir(struct node *temp)
 	temp->num =x;
 	printf("\nyeni sayi:%d\n",temp->num);
 }
-void displayList2()
+
+void ekle(int t,int s)
 {
-    struct node *tmp;
-    if(stnode == NULL)
-    {
-        printf(" List is empty.");
-    }
-    else
-    {
-        tmp = stnode;
-        while(tmp != NULL)
-        {
-            printf(" Data = %d\n", tmp->num); 
-            tmp = tmp->nextptr;                     
-        }
-    }
+	
+	struct node *tutucu=NULL,*tmp=NULL;
+	tmp=stnode;
+	while (tmp != NULL)
+	{
+		if (s == tmp->num) 	
+		{
+			tutucu=tmp;
+			tutucu = (struct node *)malloc(sizeof(struct node));
+			if(tutucu == NULL) 
+    			{
+        			printf(" Memory can not be allocated.");
+    			}
+			tutucu->num =t;
+			tutucu->nextptr =tmp->nextptr;
+			tmp->nextptr =tutucu;
+			
+				
+		}
+		tmp = tmp->nextptr;  
+	}
+
+}
+
+void sil(int z)
+{
+	struct node *tutucu=NULL,*temp=NULL,*silici=NULL;
+	temp=stnode;
+	while (temp->nextptr != NULL)
+	{
+		if (z == temp->nextptr->num) 	
+		{
+			tutucu=temp;
+			if(tutucu->nextptr == NULL) 
+    			{
+        			printf("aradiginiz sayi bulunamadi! ");
+    			}
+			tutucu=temp->nextptr->nextptr;
+			silici=temp->nextptr;
+			temp->nextptr =tutucu;
+			free(silici);
+				
+		}
+		temp = temp->nextptr;  
+	}
+	
 }
