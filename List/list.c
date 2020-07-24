@@ -19,14 +19,13 @@ generic_list_t *generic_list_create()
 
 void generic_list_display(generic_list_t *this)
 {
-	struct generic_list *temp=NULL;
-	if(this == NULL)
+	struct generic_list *temp=this;
+	if(temp == NULL)
     	{
         	printf(" List is empty.");
     	}
     	else
 	{
-        	temp = this;
         	while(temp != NULL)
         	{
             		printf(" id = %d\n", temp->generic_variables.id); 
