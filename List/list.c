@@ -7,7 +7,8 @@
 generic_list_t *generic_list_create()
 {
 	generic_list_t *this = malloc(sizeof(generic_list_t));
-
+	this->next=NULL;
+	this->data=NULL;
 	if (!this)
 	{
 		return NULL;
@@ -18,7 +19,7 @@ generic_list_t *generic_list_create()
 
 void generic_list_display(generic_list_t *this)
 {
-	struct generic_list *temp=this;
+	generic_list_t *temp=this;
 	if(temp == NULL)
     	{
         	printf(" List is empty.");
@@ -36,35 +37,30 @@ void generic_list_display(generic_list_t *this)
     }
 }
 
-
-
 void generic_list_add_node(generic_list_t *this, void *node)
 {
-	struct generic_list *temp=NULL ,*temp2=NULL;
-	
-	this->generic_variables.id = 1; 
+	generic_list_t *temp=NULL ;
 	temp=this;
+	temp->generic_variables.id = 1; 
+
 	
-	while(temp != NULL)
-	{
-		if(temp->data == NULL)
-		{	
-		printf("\ndata 1 KONTROL:%p\n",temp->data);
-			temp->data = node;
-			printf("\n data 2 KONTROL:%p\n",temp->data);
-		}
-		printf("\ntemp 1 KONTROL:%p\n",temp);
+	while(temp->next != NULL)
+	{	
+		
 		temp=temp->next;
-		printf("\ntemp 2 KONTROL:%p\n",temp);
+		printf("temp kontrol\n");
 	}
 	
-	if(temp == NULL)
-	{
-		struct generic_list *temp2 = malloc(sizeof(generic_list_t));
-		printf("\n temp2  KONTROL:%p\n",temp2);
-		temp2->next=NULL;
-		temp2->data=NULL;
-		temp = temp2;
-		printf("\ntemp 3 KONTROL:%p\n",temp);
+	if(temp->data == NULL)
+	{	
+		printf("data kontrol\n");
+		temp->data = node;
+			
 	}
+		
+	generic_list_t *temp2 = malloc(sizeof(generic_list_t));
+	temp2->next=NULL;
+	temp2->data=NULL;
+	temp->next = temp2;
+
 }

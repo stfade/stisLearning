@@ -18,7 +18,7 @@ user_informations_t *user_informations_create()
 
 void destroy(user_informations_t *this)
 {
-	struct user_informations_t *temp=this;
+	user_informations_t *temp=this;
 	
 	while(temp == NULL)
 	{
