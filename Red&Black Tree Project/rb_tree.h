@@ -2,11 +2,11 @@
 #ifndef RB_TREE_H_
 #define RB_TREE_H_
 
-enum Colors{RED,BLACK};
+enum Colors {BLACK,RED};
 typedef struct rb_tree_node
 {
     int id;
-    int color;
+    enum Colors color;
     void *data;
     struct rb_tree_node *parent, *left, *right;
 } rb_tree_node_t;
@@ -23,7 +23,9 @@ void rb_tree_init(rb_tree_t *this, void *);
 void rb_tree_deinit(rb_tree_t *this);
 void rb_tree_destroy(rb_tree_t *this);
 void rb_tree_add(rb_tree_t *this, void *data);
-void rb_tree_display(rb_tree_t *this);
+void inorder(rb_tree_t *this, rb_tree_node_t *node);
+rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id);
+void rb_tree_delete(rb_tree_t *this,int id);
 void right_rotate(rb_tree_t *this, rb_tree_node_t *node);
 void left_rotate(rb_tree_t *this, rb_tree_node_t *node);
 void fix(rb_tree_t *this, rb_tree_node_t *node);

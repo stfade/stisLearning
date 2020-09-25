@@ -5,6 +5,7 @@
 rb_tree_t *rb_tree_create()
 {
     rb_tree_t *this = malloc(sizeof(rb_tree_t));
+
     if(this == NULL)
     {
         printf("allocation error!");
@@ -12,12 +13,15 @@ rb_tree_t *rb_tree_create()
 
     return this;
 }
+
 void rb_tree_init(rb_tree_t *this,void *user_d)
 {
     this->root = NULL;
-    this->id_counter = 0;
+    this->id_counter = 1;
+    // TODO : user_f degiskenin ismi okunabilir olmali.
     this->user_f = user_d;
 }
+
 void rb_tree_deinit(rb_tree_t *this)
 {
     if(this->root != NULL)
@@ -59,7 +63,7 @@ void rb_tree_add(rb_tree_t *this, void *data)
     temp = malloc(sizeof(rb_tree_node_t));
     temp->id = this->id_counter;
     temp->color = RED;
-    temp->data = NULL;
+    temp->data = data;
     temp->right = NULL;
     temp->left = NULL;
     temp->parent = parent;
@@ -76,95 +80,187 @@ void rb_tree_add(rb_tree_t *this, void *data)
             printf("parent in soluna temp eklendi \n");
         }
     }
+
     if(this->root == NULL)
     {
         temp->color = BLACK;
         this->root = temp;
     }
-    if(temp->data == NULL)
-    {
-        temp->data = data;
-    }
-    this->id_counter ++;
+
+    this->id_counter++;
+    fix(this,temp);
 }
-void rb_tree_display(rb_tree_t *this)
+void inorder(rb_tree_t *this, rb_tree_node_t *node)
+{
+    if(node == NULL)
+    {
+        return;
+    }
+    inorder(this,node->left);
+    printf("\nid = %d , ", node->id);
+    printf("\ncolor = %d , ", node->color);
+    this->user_f(node->data);
+    inorder(this,node->right);
+
+}
+
+rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id)
 {
     rb_tree_node_t *temp = this->root;
-    if(temp == NULL)
+
+    while(temp != NULL && temp->id != id)
     {
-        printf("\nTree is empty\n");
+        if(id < temp->id)
+        {
+            temp = temp->left;
+        }
+
+        else
+        {
+            temp = temp->right;
+        }
     }
-    while(temp != NULL)
+
+    if(temp->id != id)
     {
-        printf("\nid = %d , ", temp->id);
-        this->user_f(temp->data);
-        // tum agacta gezinmem lazim.
+        printf("matcing not found\n");
+        return NULL;
     }
+
+    printf("\nid = %d , ", temp->id);
+    printf("\ncolor = %d , ", temp->color);
+    this->user_f(temp->data);
+    return temp;
 }
+
+void rb_tree_delete(rb_tree_t *this,int id)
+{
+    rb_tree_node_t *result = rb_tree_search(this,id);
+    printf("result->id = %d\n",result->id);
+    
+    rb_tree_node_t *temp = result;
+    rb_tree_node_t *temp2 = NULL;
+
+
+    if(result->left !=NULL)
+    {
+        temp = temp->left;
+
+        while(temp->right != NULL)
+        {
+            temp = temp->right;
+        }
+    }
+
+    else if(result->right != NULL)
+    {
+        printf("temp->id = %d\n",temp->id);
+        temp = temp->right;
+        printf("temp->id = %d\n",temp->id);
+    }
+
+    printf("result->id = %d\n",result->id);
+    result = temp;
+    printf("result->id = %d\n",result->id);
+    temp->data = NULL;
+
+    if(temp->parent != NULL)
+    {
+        if(temp == temp->parent->right)
+        {
+            temp->parent->right = NULL;
+        }
+
+        else
+        {
+            temp->parent->left = NULL;
+        }
+
+        temp->parent = NULL;
+    }
+
+    printf("temp->id = %d\n",temp->id);
+    free(temp);
+    printf("temp->id = %d\n",temp->id);
+    temp2 = this->root;
+
+    while(temp2->left != NULL)
+    {
+        temp2 = temp2->left;
+    }
+
+    fix(this,temp2);
+}
+
 void right_rotate(rb_tree_t *this, rb_tree_node_t *node)
 {
-    rb_tree_node_t *temp = node->left;
+    rb_tree_node_t *sibling = node->left;
 
-    node->left = temp->right;
+    node->left = sibling->right;
     // node'un solu, node'un solunun sagi oldu,
 
-    if(node->left != NULL)
+    if(sibling->right != NULL)
     {
-        node->left->parent = node;
-        // node'un left'ini(node'un solunun sagini), parent'ina(node'a) bagladik.
+        sibling->right->parent = node;
+        // node'un left'ini(node'un solunu), parent'ina(node'a) bagladik.
     }
-    temp->parent = node->parent;
+    sibling->parent = node->parent;
     // temp ve node'un parent'i ayni oldu.
 
     if(node->parent == NULL)
     {
-        this->root = temp;
+        this->root = sibling;
         // node'un parent'i yoksa root, temp oldu.
-    }
-    else if(node == node->parent->right)
-    {
-        node->parent->right = temp;
-        // node, parent'inin sagindaysa parent'in sagi temp oldu.
     }
     else
     {
-        node->parent->left = temp;
-        // node, parent'inin solundaysa parent'inin solu temp oldu.
+        if(node == node->parent->right)
+        {
+            node->parent->right = sibling;
+            // node, parent'inin sagindaysa parent'in sagi temp oldu.
+        }
+        else
+        {
+            node->parent->left = sibling;
+            // node, parent'inin solundaysa parent'inin solu temp oldu.
+        }
     }
-
-    temp->right = node;
+    sibling->right = node;
     // node'un solunun sagi node oldu.
-    node->parent = temp;
+    node->parent = sibling;
     // node'un parent'i node'un solu oldu.
 }
 void left_rotate(rb_tree_t *this, rb_tree_node_t *node)
 {
-    rb_tree_node_t *temp = node->right;
-    node->right = temp->left;
+    rb_tree_node_t *sibling = node->right;
+    node->right = sibling->left;
 
-    if(node->right != NULL)
+    if(sibling->left != NULL)
     {
-        node->right->parent = node;
+        sibling->left->parent = node;
     }
-    temp->parent = node->parent;
+    sibling->parent = node->parent;
 
     if(node->parent == NULL)
     {
-        this->root = temp;
-    }
-    else if(node == node->parent->left)
-    {
-        node->parent->left = temp;
+        this->root = sibling;
     }
     else
     {
-        node->parent->right = temp;
+        if(node == node->parent->left)
+        {
+            node->parent->left = sibling;
+        }
+        else
+        {
+            node->parent->right = sibling;
+        }
     }
 
-    temp->left = node;
-    node->parent = temp;
-
+    sibling->left = node;
+    node->parent = sibling;
 }
+
 void fix(rb_tree_t *this, rb_tree_node_t *node)
 {
     while((node != this->root) && (node->parent->color == RED))
@@ -185,6 +281,7 @@ void fix(rb_tree_t *this, rb_tree_node_t *node)
             }
             else
             {
+
                 // Case 2:
                 // node, node'un babasinin sagi ise "left_rotate" yapacagiz.
                 if(node == node->parent->right)
@@ -216,12 +313,11 @@ void fix(rb_tree_t *this, rb_tree_node_t *node)
 
             else
             {
-                if(node == node->parent->right)
+                if(node == node->parent->left)
                 {
                     node = node->parent;
                     right_rotate(this,node);
                 }
-
                 node->parent->color = BLACK;
                 node->parent->parent->color = RED;
                 left_rotate(this,node->parent->parent);

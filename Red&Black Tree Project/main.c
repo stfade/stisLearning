@@ -21,6 +21,7 @@ int main()
 }
 void menu(rb_tree_t *test)
 {
+    int id;
     int secim;
     printf("1-Ekleme\n");
     printf("2-Listeleme\n");
@@ -43,17 +44,25 @@ void menu(rb_tree_t *test)
             printf("\n surname?: \n");
             scanf("%s",surname_array);
             user_informations_set_surname(user, surname_array);
-            rb_tree_add(test, user);
+            rb_tree_add(test,user);
             wait();
             break;
         case 2:
-            rb_tree_display(test);
+            inorder(test, test->root);
             wait();
             break;
         case 3:
-
+            printf("bulmak istediginiz verinin id'si? :\n");
+            scanf("%d",&id);
+            rb_tree_search(test,id);
+            wait();
+            break;
         case 4:
-
+            printf("silmek istediginiz verinin id'si? :\n");
+            scanf("%d",&id);
+            rb_tree_delete(test,id);
+            wait();
+            break;
         case 5:
     		printf("Program Bitti!\n");
         	exit(0);

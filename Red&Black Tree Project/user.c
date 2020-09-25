@@ -31,10 +31,9 @@ char *user_informations_get_surname(user_informations_t *this)
 }
 void user_destroy(user_informations_t *this)
 {
-	user_informations_t *temp = this;
-	if(temp != NULL)
+	if(this != NULL)
 	{
-		free(temp);
+		free(this);
 	}
 }
 void *user_display(user_informations_t *this)
