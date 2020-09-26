@@ -14,19 +14,20 @@ rb_tree_t *rb_tree_create()
     return this;
 }
 
-void rb_tree_init(rb_tree_t *this,void *user_d)
+void rb_tree_init(rb_tree_t *this,void *user_display,void *user_delete)
 {
     this->root = NULL;
     this->id_counter = 1;
     // TODO : user_f degiskenin ismi okunabilir olmali.
-    this->user_f = user_d;
+    this->user_display = user_display;
+    this->user_delete = user_delete;
 }
 
 void rb_tree_deinit(rb_tree_t *this)
 {
     if(this->root != NULL)
     {
-        this->root->data = NULL;
+        this->user_delete(this->root->data);
         free(this->root);
         // TODO: eger root doluysa tum dugumlerdeki veriler silinmesi gerekiyor.
     }
@@ -35,6 +36,7 @@ void rb_tree_destroy(rb_tree_t *this)
 {
     rb_tree_deinit(this);
     free(this);
+    printf("Everything is destroyed\n");
 }
 void rb_tree_test(rb_tree_t *this)
 {
@@ -60,6 +62,7 @@ void rb_tree_add(rb_tree_t *this, void *data)
             temp = temp->left;
         }
     }
+
     temp = malloc(sizeof(rb_tree_node_t));
     temp->id = this->id_counter;
     temp->color = RED;
@@ -92,14 +95,20 @@ void rb_tree_add(rb_tree_t *this, void *data)
 }
 void inorder(rb_tree_t *this, rb_tree_node_t *node)
 {
+    if(this->root == NULL)
+    {
+        printf("TREE IS EMPTY\n");
+    }
+
     if(node == NULL)
     {
         return;
     }
+
     inorder(this,node->left);
     printf("\nid = %d , ", node->id);
     printf("\ncolor = %d , ", node->color);
-    this->user_f(node->data);
+    this->user_display(node->data);
     inorder(this,node->right);
 
 }
@@ -129,7 +138,7 @@ rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id)
 
     printf("\nid = %d , ", temp->id);
     printf("\ncolor = %d , ", temp->color);
-    this->user_f(temp->data);
+    // this->user_display(temp->data);
     return temp;
 }
 
@@ -137,59 +146,63 @@ void rb_tree_delete(rb_tree_t *this,int id)
 {
     rb_tree_node_t *result = rb_tree_search(this,id);
     printf("result->id = %d\n",result->id);
-    
     rb_tree_node_t *temp = result;
-    rb_tree_node_t *temp2 = NULL;
-
 
     if(result->left !=NULL)
     {
         temp = temp->left;
-
-        while(temp->right != NULL)
-        {
-            temp = temp->right;
-        }
     }
 
-    else if(result->right != NULL)
+    while(temp->right != NULL)
     {
-        printf("temp->id = %d\n",temp->id);
         temp = temp->right;
-        printf("temp->id = %d\n",temp->id);
+        printf("KONTROl\n");
     }
 
-    printf("result->id = %d\n",result->id);
-    result = temp;
-    printf("result->id = %d\n",result->id);
-    temp->data = NULL;
-
-    if(temp->parent != NULL)
+    while(temp->left != NULL)
     {
-        if(temp == temp->parent->right)
-        {
-            temp->parent->right = NULL;
-        }
-
-        else
-        {
-            temp->parent->left = NULL;
-        }
-
-        temp->parent = NULL;
+        temp = temp->left;
     }
 
-    printf("temp->id = %d\n",temp->id);
-    free(temp);
-    printf("temp->id = %d\n",temp->id);
-    temp2 = this->root;
+    temp = rb_tree_replace(this,result,temp);
+    //this->user_delete(temp->data);
+    //temp->data = NULL;
 
-    while(temp2->left != NULL)
+
+
+    // temp->parent = NULL;
+
+    //if(this->root->id == temp->id)
+    //{
+        // rb_tree_destroy(this);
+    //}
+
+    //else
+    //{
+    //    free(temp);
+    //}
+    // fix(this,temp2);
+}
+
+rb_tree_node_t *rb_tree_replace(rb_tree_t *this, rb_tree_node_t *x, rb_tree_node_t *y)
+{
+    if(x->parent == NULL)
     {
-        temp2 = temp2->left;
+        this->root = y;
     }
 
-    fix(this,temp2);
+    else if(x == x->parent->left)
+    {
+        x->parent->left = y;
+    }
+
+    else
+    {
+        x->parent->right = y;
+    }
+
+    y->parent = x->parent;
+    return x;
 }
 
 void right_rotate(rb_tree_t *this, rb_tree_node_t *node)
@@ -230,6 +243,7 @@ void right_rotate(rb_tree_t *this, rb_tree_node_t *node)
     node->parent = sibling;
     // node'un parent'i node'un solu oldu.
 }
+
 void left_rotate(rb_tree_t *this, rb_tree_node_t *node)
 {
     rb_tree_node_t *sibling = node->right;
@@ -325,19 +339,4 @@ void fix(rb_tree_t *this, rb_tree_node_t *node)
         }
     }
     this->root->color = BLACK;
-}
-rb_tree_node_t *sibling(rb_tree_node_t *node)
-{
-    if(node != NULL)
-    {
-        if(node->parent != NULL)
-        {
-            if(node == node->parent->left)
-            {
-                return node->parent->right;
-            }
-            else
-                return node->parent->left;
-        }
-    }
 }

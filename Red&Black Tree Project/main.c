@@ -8,7 +8,7 @@ void wait();
 int main()
 {
     rb_tree_t *test = rb_tree_create();
-    rb_tree_init(test,&user_display);
+    rb_tree_init(test,&user_display,&user_delete);
     while(1)
     {
         menu(test);
@@ -36,6 +36,7 @@ void menu(rb_tree_t *test)
     	case 1:
             system("clear");
             user_informations_t *user = user_informations_create();
+            user_init(user);
             char name_array[128];
             printf("\n name?: \n");
             scanf("%s",name_array);
