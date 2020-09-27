@@ -8,7 +8,7 @@ void wait();
 int main()
 {
     rb_tree_t *test = rb_tree_create();
-    rb_tree_init(test,&user_display,&user_delete);
+    rb_tree_init(test, &user_display, &user_delete);
     while(1)
     {
         menu(test);

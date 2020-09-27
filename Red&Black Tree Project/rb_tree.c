@@ -14,20 +14,19 @@ rb_tree_t *rb_tree_create()
     return this;
 }
 
-void rb_tree_init(rb_tree_t *this,void *user_display,void *user_delete)
+void rb_tree_init(rb_tree_t *this,void (*display)(void*),void (*delete)(void*))
 {
     this->root = NULL;
     this->id_counter = 1;
-    // TODO : user_f degiskenin ismi okunabilir olmali.
-    this->user_display = user_display;
-    this->user_delete = user_delete;
+    this->user_info_display = display;
+    this->user_info_delete = delete;
 }
 
 void rb_tree_deinit(rb_tree_t *this)
 {
     if(this->root != NULL)
     {
-        this->user_delete(this->root->data);
+        this->user_info_delete(this->root->data);
         free(this->root);
         // TODO: eger root doluysa tum dugumlerdeki veriler silinmesi gerekiyor.
     }
@@ -108,7 +107,7 @@ void inorder(rb_tree_t *this, rb_tree_node_t *node)
     inorder(this,node->left);
     printf("\nid = %d , ", node->id);
     printf("\ncolor = %d , ", node->color);
-    this->user_display(node->data);
+    this->user_info_display(node->data);
     inorder(this,node->right);
 
 }
@@ -136,17 +135,17 @@ rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id)
         return NULL;
     }
 
-    printf("\nid = %d , ", temp->id);
-    printf("\ncolor = %d , ", temp->color);
-    // this->user_display(temp->data);
+    printf("\nMatching id = %d , ", temp->id);
+    // this->user_info_display(temp->data);
     return temp;
 }
 
 void rb_tree_delete(rb_tree_t *this,int id)
 {
     rb_tree_node_t *result = rb_tree_search(this,id);
-    printf("result->id = %d\n",result->id);
     rb_tree_node_t *temp = result;
+    void *helper = result->data;
+    int temp_id = result->id;
 
     if(result->left !=NULL)
     {
@@ -156,7 +155,6 @@ void rb_tree_delete(rb_tree_t *this,int id)
     while(temp->right != NULL)
     {
         temp = temp->right;
-        printf("KONTROl\n");
     }
 
     while(temp->left != NULL)
@@ -164,27 +162,28 @@ void rb_tree_delete(rb_tree_t *this,int id)
         temp = temp->left;
     }
 
-    temp = rb_tree_replace(this,result,temp);
-    //this->user_delete(temp->data);
-    //temp->data = NULL;
+    result->data = temp->data;
+    result->id = temp->id;
+    temp->data = helper;
+    temp->id = temp_id;
 
+    this->user_info_delete(temp->data);
 
+    if(temp == temp->parent->right)
+    {
+        temp->parent->right = NULL;
+    }
 
-    // temp->parent = NULL;
+    else
+    {
+        temp->parent->left = NULL;
+    }
 
-    //if(this->root->id == temp->id)
-    //{
-        // rb_tree_destroy(this);
-    //}
-
-    //else
-    //{
-    //    free(temp);
-    //}
+    free(temp);
     // fix(this,temp2);
 }
 
-rb_tree_node_t *rb_tree_replace(rb_tree_t *this, rb_tree_node_t *x, rb_tree_node_t *y)
+rb_tree_node_t *rb_tree_swap(rb_tree_t *this, rb_tree_node_t *x, rb_tree_node_t *y)
 {
     if(x->parent == NULL)
     {
