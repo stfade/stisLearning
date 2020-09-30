@@ -90,7 +90,7 @@ void rb_tree_add(rb_tree_t *this, void *data)
     }
 
     this->id_counter++;
-    fix(this,temp);
+    add_fix(this,temp);
 }
 void inorder(rb_tree_t *this, rb_tree_node_t *node)
 {
@@ -112,6 +112,25 @@ void inorder(rb_tree_t *this, rb_tree_node_t *node)
 
 }
 
+void preorder(rb_tree_t *this, rb_tree_node_t *node)
+{
+    if(this->root == NULL)
+    {
+        printf("TREE IS EMPTY\n");
+    }
+
+    if(node == NULL)
+    {
+        return;
+    }
+
+    printf("\nid = %d , ", node->id);
+    printf("\ncolor = %d , ", node->color);
+    this->user_info_display(node->data);
+    preorder(this,node->left);
+    preorder(this,node->right);
+
+}
 rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id)
 {
     rb_tree_node_t *temp = this->root;
@@ -129,20 +148,33 @@ rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id)
         }
     }
 
-    if(temp->id != id)
+    if(temp == NULL)
     {
         printf("matcing not found\n");
         return NULL;
     }
 
-    printf("\nMatching id = %d , ", temp->id);
-    // this->user_info_display(temp->data);
-    return temp;
+    else
+    {
+        printf("\nMatching id = %d , ", temp->id);
+        return temp;
+    }
 }
 
 void rb_tree_delete(rb_tree_t *this,int id)
 {
     rb_tree_node_t *result = rb_tree_search(this,id);
+
+    if(result == NULL)
+    {
+        return;
+    }
+
+    if(result->left != NULL && result->right != NULL)
+    {
+        rb_tree_node_t *temp = result;
+    }
+
     rb_tree_node_t *temp = result;
     void *helper = result->data;
     int temp_id = result->id;
@@ -167,41 +199,133 @@ void rb_tree_delete(rb_tree_t *this,int id)
     temp->data = helper;
     temp->id = temp_id;
 
+    if(temp->color == BLACK)
+    {
+        delete_fix(this,temp);
+    }
+
     this->user_info_delete(temp->data);
 
-    if(temp == temp->parent->right)
+    if(temp->parent != NULL)
     {
-        temp->parent->right = NULL;
+        if(temp == temp->parent->right)
+        {
+            temp->parent->right = NULL;
+        }
+
+        else
+        {
+            temp->parent->left = NULL;
+        }
+    }
+
+    //delete_fix(this,fix_pt);
+    /*
+    if(fix_pt->color == BLACK)
+    {
+        delete_fix(this,fix_pt);
+    }
+    */
+    if(this->root == temp)
+    {
+        //rb_tree_deinit(this);
+        free(this->root);
+        this->root = NULL;
+        //fix_pt = NULL;
     }
 
     else
     {
-        temp->parent->left = NULL;
+
+        free(temp);
     }
 
-    free(temp);
-    // fix(this,temp2);
+    // delete_fix(this,fix_pt);
 }
 
-rb_tree_node_t *rb_tree_swap(rb_tree_t *this, rb_tree_node_t *x, rb_tree_node_t *y)
+void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
 {
-    if(x->parent == NULL)
+    if(node == NULL)
     {
-        this->root = y;
+        return;
     }
 
-    else if(x == x->parent->left)
+    while(node != this->root && node->color == BLACK)
     {
-        x->parent->left = y;
+        if(node == node->parent->left)
+        {
+            rb_tree_node_t *sibling = node->parent->right;
+
+            if(sibling != NULL && sibling->color == RED)
+            {
+                sibling->color = BLACK;
+                node->parent->color = RED;
+                left_rotate(this,node->parent);
+                sibling = node->parent->right;
+            }
+
+            if(sibling != NULL && sibling->left->color == BLACK && sibling->right->color == BLACK)
+            {
+                sibling->color = RED;
+                node = node->parent;
+            }
+
+            else
+            {
+                if(sibling != NULL && sibling->right->color == BLACK)
+                {
+                    sibling->left->color = BLACK;
+                    sibling->color = RED;
+                    right_rotate(this,sibling);
+                    sibling = node->parent->right;
+                }
+
+                sibling->color = node->parent->color;
+                node->parent->color = BLACK;
+                sibling->right->color = BLACK;
+                left_rotate(this,node->parent);
+                node = this->root;
+            }
+        }
+
+        else
+        {
+            rb_tree_node_t *sibling = node->parent->left;
+
+            if(sibling != NULL && sibling->color == RED)
+            {
+                sibling->color = BLACK;
+                node->parent->color = RED;
+                right_rotate(this,node->parent);
+                sibling = node->parent->left;
+            }
+
+            if(sibling != NULL && sibling->left->color == BLACK && sibling->right->color == BLACK)
+            {
+                sibling->color = RED;
+                node = node->parent;
+            }
+
+            else
+            {
+                if(sibling != NULL && sibling->left->color == BLACK)
+                {
+                    sibling->right->color = BLACK;
+                    sibling->color = RED;
+                    left_rotate(this,sibling);
+                    sibling = node->parent->left;
+                }
+
+                sibling->color = node->parent->color;
+                node->parent->color = BLACK;
+                sibling->left->color = BLACK;
+                right_rotate(this,node->parent);
+                node = this->root;
+            }
+        }
     }
 
-    else
-    {
-        x->parent->right = y;
-    }
-
-    y->parent = x->parent;
-    return x;
+    node->color = BLACK;
 }
 
 void right_rotate(rb_tree_t *this, rb_tree_node_t *node)
@@ -274,8 +398,13 @@ void left_rotate(rb_tree_t *this, rb_tree_node_t *node)
     node->parent = sibling;
 }
 
-void fix(rb_tree_t *this, rb_tree_node_t *node)
+void add_fix(rb_tree_t *this, rb_tree_node_t *node)
 {
+    if(node == NULL)
+    {
+        return;
+    }
+
     while((node != this->root) && (node->parent->color == RED))
     {
         if(node->parent == node->parent->parent->left)
@@ -338,4 +467,26 @@ void fix(rb_tree_t *this, rb_tree_node_t *node)
         }
     }
     this->root->color = BLACK;
+}
+
+rb_tree_node_t *sibling(rb_tree_node_t *node)
+{
+    rb_tree_node_t *sib = NULL;
+    if(node != NULL)
+    {
+        if(node->parent != NULL)
+        {
+            if(node == node->parent->right)
+            {
+                sib = node->parent->left;
+            }
+
+            else
+            {
+                sib = node->parent->right;
+            }
+        }
+    }
+
+    return sib;
 }

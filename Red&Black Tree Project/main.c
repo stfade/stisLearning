@@ -3,13 +3,26 @@
 #include <string.h>
 #include "rb_tree.h"
 #include "user.h"
+
+typedef enum
+{
+    ADD,
+    DISPLAY,
+    SEARCH,
+    DELETE,
+    EXIT,
+    MENU_LAST_ITEM
+}menu_items;
+
+//void array[];
+
 void menu(rb_tree_t *);
 void wait();
 int main()
 {
     rb_tree_t *test = rb_tree_create();
     rb_tree_init(test, &user_display, &user_delete);
-    while(1)
+    for(;;)
     {
         menu(test);
     }
@@ -23,48 +36,51 @@ void menu(rb_tree_t *test)
 {
     int id;
     int secim;
-    printf("1-Ekleme\n");
-    printf("2-Listeleme\n");
-    printf("3-Arama\n");
-    printf("4-Silme\n");
-    printf("5-Cikis\n");
-    printf("Lutfen Secim Yapiniz --> ");
+    char name_array[128];
+    char surname_array[128];
+    printf("1-Add\n");
+    printf("2-Display\n");
+    printf("3-Search\n");
+    printf("4-Delete\n");
+    printf("5-Exit\n");
+    printf("Please make a selection --> ");
     scanf("%d", &secim);
+    secim--;
 
     switch(secim)
     {
-    	case 1:
+    	case ADD:
             system("clear");
             user_informations_t *user = user_informations_create();
             user_init(user);
-            char name_array[128];
+            memset(name_array, '\0', sizeof(name_array));
+            memset(surname_array, '\0', sizeof(surname_array));
             printf("\n name?: \n");
             scanf("%s",name_array);
             user_informations_set_name(user, name_array);
-            char surname_array[128];
             printf("\n surname?: \n");
             scanf("%s",surname_array);
             user_informations_set_surname(user, surname_array);
             rb_tree_add(test,user);
             wait();
             break;
-        case 2:
-            inorder(test, test->root);
+        case DISPLAY:
+            preorder(test, test->root);
             wait();
             break;
-        case 3:
+        case SEARCH:
             printf("bulmak istediginiz verinin id'si? :\n");
             scanf("%d",&id);
             rb_tree_search(test,id);
             wait();
             break;
-        case 4:
+        case DELETE:
             printf("silmek istediginiz verinin id'si? :\n");
             scanf("%d",&id);
             rb_tree_delete(test,id);
             wait();
             break;
-        case 5:
+        case EXIT:
     		printf("Program Bitti!\n");
         	exit(0);
         	break;

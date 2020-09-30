@@ -25,12 +25,14 @@ void rb_tree_deinit(rb_tree_t *this);
 void rb_tree_destroy(rb_tree_t *this);
 void rb_tree_add(rb_tree_t *this, void *data);
 void inorder(rb_tree_t *this, rb_tree_node_t *node);
+void preorder(rb_tree_t *this, rb_tree_node_t *node);
 rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id);
 void rb_tree_delete(rb_tree_t *this,int id);
-rb_tree_node_t *rb_tree_swap(rb_tree_t *this, rb_tree_node_t *, rb_tree_node_t *);
+void delete_fix(rb_tree_t *this, rb_tree_node_t *node);
 void right_rotate(rb_tree_t *this, rb_tree_node_t *node);
 void left_rotate(rb_tree_t *this, rb_tree_node_t *node);
-void fix(rb_tree_t *this, rb_tree_node_t *node);
+void add_fix(rb_tree_t *this, rb_tree_node_t *node);
+rb_tree_node_t *sibling(rb_tree_node_t *node);
 void rb_tree_test(rb_tree_t *this);
 
 #endif
