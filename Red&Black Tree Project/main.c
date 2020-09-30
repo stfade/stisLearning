@@ -36,8 +36,8 @@ void menu(rb_tree_t *test)
 {
     int id;
     int secim;
-    char name_array[128];
-    char surname_array[128];
+    char name_array[128] = "Samet";
+    char surname_array[128] = "Taslioglu";
     printf("1-Add\n");
     printf("2-Display\n");
     printf("3-Search\n");
@@ -53,19 +53,27 @@ void menu(rb_tree_t *test)
             system("clear");
             user_informations_t *user = user_informations_create();
             user_init(user);
+            /*
             memset(name_array, '\0', sizeof(name_array));
             memset(surname_array, '\0', sizeof(surname_array));
             printf("\n name?: \n");
             scanf("%s",name_array);
+            */
             user_informations_set_name(user, name_array);
+            /*
             printf("\n surname?: \n");
             scanf("%s",surname_array);
+            */
             user_informations_set_surname(user, surname_array);
+            /*
+            printf("\n id: \n");
+            scanf("%d",&id);
+            */
             rb_tree_add(test,user);
             wait();
             break;
         case DISPLAY:
-            preorder(test, test->root);
+            inorder(test, test->root);
             wait();
             break;
         case SEARCH:

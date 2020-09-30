@@ -92,6 +92,138 @@ void rb_tree_add(rb_tree_t *this, void *data)
     this->id_counter++;
     add_fix(this,temp);
 }
+
+void add_fix(rb_tree_t *this, rb_tree_node_t *node)
+{
+    if(node == NULL)
+    {
+        return;
+    }
+
+    while((node != this->root) && (node->parent->color == RED))
+    {
+        if(node->parent == node->parent->parent->left)
+        {
+            rb_tree_node_t *uncle = node->parent->parent->right;
+
+            // Case 1:
+            if(uncle != NULL && uncle->color == RED)
+            {
+                node->parent->color = BLACK;
+                uncle->color = BLACK;
+                node->parent->parent->color = RED;
+                node = node->parent->parent;
+            }
+            else
+            {
+
+                // Case 2:
+                if(node == node->parent->right)
+                {
+                    node = node->parent;
+                    left_rotate(this,node);
+                }
+                // Case 3:
+                node->parent->color = BLACK;
+                node->parent->parent->color = RED;
+                right_rotate(this,node->parent->parent);
+            }
+        }
+
+        else
+        {
+            rb_tree_node_t *uncle = node->parent->parent->left;
+
+            if(uncle != NULL && uncle->color == RED)
+            {
+                node->parent->color = BLACK;
+                uncle->color = BLACK;
+                node->parent->parent->color = RED;
+                node = node->parent->parent;
+            }
+
+            else
+            {
+                if(node == node->parent->left)
+                {
+                    node = node->parent;
+                    right_rotate(this,node);
+                }
+                node->parent->color = BLACK;
+                node->parent->parent->color = RED;
+                left_rotate(this,node->parent->parent);
+            }
+        }
+    }
+    this->root->color = BLACK;
+}
+
+void right_rotate(rb_tree_t *this, rb_tree_node_t *root)
+{
+    rb_tree_node_t *pivot = root->left;
+
+    root->left = pivot->right;
+
+    if(pivot->right != NULL)
+    {
+        pivot->right->parent = root;
+    }
+
+    pivot->parent = root->parent;
+
+    if(root->parent == NULL)
+    {
+        this->root = pivot;
+    }
+
+    else
+    {
+        if(root == root->parent->right)
+        {
+            root->parent->right = pivot;
+        }
+
+        else
+        {
+            root->parent->left = pivot;
+        }
+    }
+
+    pivot->right = root;
+    root->parent = pivot;
+}
+
+void left_rotate(rb_tree_t *this, rb_tree_node_t *root)
+{
+    rb_tree_node_t *pivot = root->right;
+    root->right = pivot->left;
+
+    if(pivot->left != NULL)
+    {
+        pivot->left->parent = root;
+    }
+    pivot->parent = root->parent;
+
+    if(root->parent == NULL)
+    {
+        this->root = pivot;
+    }
+    else
+    {
+        if(root == root->parent->left)
+        {
+            root->parent->left = pivot;
+        }
+        else
+        {
+            root->parent->right = pivot;
+        }
+    }
+
+    pivot->left = root;
+    root->parent = pivot;
+}
+
 void inorder(rb_tree_t *this, rb_tree_node_t *node)
 {
     if(this->root == NULL)
@@ -188,10 +320,10 @@ void rb_tree_delete(rb_tree_t *this,int id)
     {
         temp = temp->right;
     }
-
-    while(temp->left != NULL)
+    if(temp->left != NULL)
     {
-        temp = temp->left;
+        temp->left->parent = temp->parent;
+        temp->parent->left = temp->left;
     }
 
     result->data = temp->data;
@@ -219,19 +351,10 @@ void rb_tree_delete(rb_tree_t *this,int id)
         }
     }
 
-    //delete_fix(this,fix_pt);
-    /*
-    if(fix_pt->color == BLACK)
-    {
-        delete_fix(this,fix_pt);
-    }
-    */
     if(this->root == temp)
     {
-        //rb_tree_deinit(this);
         free(this->root);
         this->root = NULL;
-        //fix_pt = NULL;
     }
 
     else
@@ -239,8 +362,6 @@ void rb_tree_delete(rb_tree_t *this,int id)
 
         free(temp);
     }
-
-    // delete_fix(this,fix_pt);
 }
 
 void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
@@ -271,7 +392,7 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
                 sibling = node->parent->right;
             }
 
-            if(sibling != NULL && sibling->left->color == BLACK && sibling->right->color == BLACK)
+            if(sibling != NULL && sibling->left != NULL && sibling->right != NULL && sibling->left->color == BLACK && sibling->right->color == BLACK)
             {
                 sibling->color = RED;
                 node = node->parent;
@@ -279,7 +400,7 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
 
             else
             {
-                if(sibling != NULL && sibling->right->color == BLACK)
+                if(sibling != NULL && sibling->right != NULL && sibling->right->color == BLACK)
                 {
                     sibling->left->color = BLACK;
                     sibling->color = RED;
@@ -345,167 +466,4 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
     }
 
     node->color = BLACK;
-}
-
-void right_rotate(rb_tree_t *this, rb_tree_node_t *node)
-{
-    rb_tree_node_t *sibling = node->left;
-
-    node->left = sibling->right;
-    // node'un solu, node'un solunun sagi oldu,
-
-    if(sibling->right != NULL)
-    {
-        sibling->right->parent = node;
-        // node'un left'ini(node'un solunu), parent'ina(node'a) bagladik.
-    }
-    sibling->parent = node->parent;
-    // temp ve node'un parent'i ayni oldu.
-
-    if(node->parent == NULL)
-    {
-        this->root = sibling;
-        // node'un parent'i yoksa root, temp oldu.
-    }
-    else
-    {
-        if(node == node->parent->right)
-        {
-            node->parent->right = sibling;
-            // node, parent'inin sagindaysa parent'in sagi temp oldu.
-        }
-        else
-        {
-            node->parent->left = sibling;
-            // node, parent'inin solundaysa parent'inin solu temp oldu.
-        }
-    }
-    sibling->right = node;
-    // node'un solunun sagi node oldu.
-    node->parent = sibling;
-    // node'un parent'i node'un solu oldu.
-}
-
-void left_rotate(rb_tree_t *this, rb_tree_node_t *node)
-{
-    rb_tree_node_t *sibling = node->right;
-    node->right = sibling->left;
-
-    if(sibling->left != NULL)
-    {
-        sibling->left->parent = node;
-    }
-    sibling->parent = node->parent;
-
-    if(node->parent == NULL)
-    {
-        this->root = sibling;
-    }
-    else
-    {
-        if(node == node->parent->left)
-        {
-            node->parent->left = sibling;
-        }
-        else
-        {
-            node->parent->right = sibling;
-        }
-    }
-
-    sibling->left = node;
-    node->parent = sibling;
-}
-
-void add_fix(rb_tree_t *this, rb_tree_node_t *node)
-{
-    if(node == NULL)
-    {
-        return;
-    }
-
-    while((node != this->root) && (node->parent->color == RED))
-    {
-        if(node->parent == node->parent->parent->left)
-        {
-            rb_tree_node_t *uncle = node->parent->parent->right;
-
-            // Case 1:
-            // node'un amcasi kirmizi ise yeniden renklendirme yapacagiz.
-            if(uncle != NULL && uncle->color == RED)
-            {
-                node->parent->color = BLACK;
-                uncle->color = BLACK;
-                node->parent->parent->color = RED;
-                node = node->parent->parent;
-                // node, kendisinin dedesi oldu. Bunu yapma sebebi bir sonraki dongude dede icin fixleri tamamlamak.
-            }
-            else
-            {
-
-                // Case 2:
-                // node, node'un babasinin sagi ise "left_rotate" yapacagiz.
-                if(node == node->parent->right)
-                {
-                    node = node->parent;
-                    left_rotate(this,node);
-                }
-                // Case 3:
-                node->parent->color = BLACK;
-                node->parent->parent->color = RED;
-                right_rotate(this,node->parent->parent);
-                // rotate'lerden sonra tekrar kontrol etmemiz gerekiyor.
-                // cunku bir yer degistirme islemi yapiyoruz.
-                // bu islemlerden sonra Red&Black Tree algoritma kurallarini cignemis olabiliriz.
-            }
-        }
-
-        else
-        {
-            rb_tree_node_t *uncle = node->parent->parent->left;
-
-            if(uncle != NULL && uncle->color == RED)
-            {
-                node->parent->color = BLACK;
-                uncle->color = BLACK;
-                node->parent->parent->color = RED;
-                node = node->parent->parent;
-            }
-
-            else
-            {
-                if(node == node->parent->left)
-                {
-                    node = node->parent;
-                    right_rotate(this,node);
-                }
-                node->parent->color = BLACK;
-                node->parent->parent->color = RED;
-                left_rotate(this,node->parent->parent);
-            }
-        }
-    }
-    this->root->color = BLACK;
-}
-
-rb_tree_node_t *sibling(rb_tree_node_t *node)
-{
-    rb_tree_node_t *sib = NULL;
-    if(node != NULL)
-    {
-        if(node->parent != NULL)
-        {
-            if(node == node->parent->right)
-            {
-                sib = node->parent->left;
-            }
-
-            else
-            {
-                sib = node->parent->right;
-            }
-        }
-    }
-
-    return sib;
 }

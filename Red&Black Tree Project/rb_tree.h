@@ -24,15 +24,14 @@ void rb_tree_init(rb_tree_t *this,void (*display)(void*),void (*delete)(void*));
 void rb_tree_deinit(rb_tree_t *this);
 void rb_tree_destroy(rb_tree_t *this);
 void rb_tree_add(rb_tree_t *this, void *data);
+void add_fix(rb_tree_t *this, rb_tree_node_t *node);
+void right_rotate(rb_tree_t *this, rb_tree_node_t *node);
+void left_rotate(rb_tree_t *this, rb_tree_node_t *node);
 void inorder(rb_tree_t *this, rb_tree_node_t *node);
 void preorder(rb_tree_t *this, rb_tree_node_t *node);
 rb_tree_node_t *rb_tree_search(rb_tree_t *this,int id);
 void rb_tree_delete(rb_tree_t *this,int id);
 void delete_fix(rb_tree_t *this, rb_tree_node_t *node);
-void right_rotate(rb_tree_t *this, rb_tree_node_t *node);
-void left_rotate(rb_tree_t *this, rb_tree_node_t *node);
-void add_fix(rb_tree_t *this, rb_tree_node_t *node);
-rb_tree_node_t *sibling(rb_tree_node_t *node);
 void rb_tree_test(rb_tree_t *this);
 
 #endif
