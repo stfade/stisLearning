@@ -256,7 +256,7 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
         {
             rb_tree_node_t *sibling = node->parent->right;
 
-            if(node->parent->color == BLACK && sibling->color == BLACK)
+            if(node->parent != this->root && node->parent->color == BLACK && sibling->color == BLACK)
             {
                 sibling->color = RED;
                 node = node->parent;
@@ -304,7 +304,7 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
         {
             rb_tree_node_t *sibling = node->parent->left;
 
-            if(node->parent->color == BLACK && sibling->color == BLACK)
+            if(node->parent != this->root && node->parent->color == BLACK && sibling->color == BLACK)
             {
                 sibling->color = RED;
                 node = node->parent;
