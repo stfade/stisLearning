@@ -440,7 +440,7 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
                 sibling = node->parent->left;
             }
 
-            if(sibling != NULL && sibling->left->color == BLACK && sibling->right->color == BLACK)
+            if(sibling != NULL && sibling->left != NULL && sibling->right != NULL && sibling->left->color == BLACK && sibling->right->color == BLACK)
             {
                 sibling->color = RED;
                 node = node->parent;
@@ -448,7 +448,7 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
 
             else
             {
-                if(sibling != NULL && sibling->left->color == BLACK)
+                if(sibling != NULL && sibling->left != NULL && sibling->left->color == BLACK)
                 {
                     sibling->right->color = BLACK;
                     sibling->color = RED;
@@ -458,7 +458,12 @@ void delete_fix(rb_tree_t *this, rb_tree_node_t *node)
 
                 sibling->color = node->parent->color;
                 node->parent->color = BLACK;
-                sibling->left->color = BLACK;
+
+                if(sibling->left != NULL)
+                {
+                    sibling->left->color = BLACK;
+                }
+
                 right_rotate(this,node->parent);
                 node = this->root;
             }
