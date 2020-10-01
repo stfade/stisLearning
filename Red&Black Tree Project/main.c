@@ -10,6 +10,7 @@ typedef enum
     DISPLAY,
     SEARCH,
     DELETE,
+    DESTROY,
     EXIT,
     MENU_LAST_ITEM
 }menu_items;
@@ -42,7 +43,8 @@ void menu(rb_tree_t *test)
     printf("2-Display\n");
     printf("3-Search\n");
     printf("4-Delete\n");
-    printf("5-Exit\n");
+    printf("5-Destroy\n");
+    printf("6-Exit\n");
     printf("Please make a selection --> ");
     scanf("%d", &secim);
     secim--;
@@ -88,8 +90,12 @@ void menu(rb_tree_t *test)
             rb_tree_delete(test,id);
             wait();
             break;
+        case DESTROY:
+            rb_tree_destroy(test);
+            wait();
+            break;
         case EXIT:
-    		printf("Program Bitti!\n");
+    		printf("SEE U LATER!\n");
         	exit(0);
         	break;
     }
@@ -97,7 +103,7 @@ void menu(rb_tree_t *test)
 void wait()
 {
     char temp;
-    printf("Devam etmek icin Enter'a basiniz!\n");
+    printf("\ncontiune for enter!\n");
     temp = getchar();
     temp = getchar();
     // system("clear");

@@ -26,17 +26,45 @@ void rb_tree_deinit(rb_tree_t *this)
 {
     if(this->root != NULL)
     {
-        this->user_info_delete(this->root->data);
-        free(this->root);
-        // TODO: eger root doluysa tum dugumlerdeki veriler silinmesi gerekiyor.
+        rb_tree_destroy_helper(this, this->root);
     }
 }
+
 void rb_tree_destroy(rb_tree_t *this)
 {
     rb_tree_deinit(this);
     free(this);
     printf("Everything is destroyed\n");
 }
+
+void rb_tree_destroy_helper(rb_tree_t *this, rb_tree_node_t *node)
+{
+    if(this->root == NULL)
+    {
+        printf("Tree Is Empty\n");
+    }
+
+    if(node == NULL)
+    {
+        return;
+    }
+
+    rb_tree_destroy_helper(this,node->left);
+    rb_tree_destroy_helper(this,node->right);
+    this->user_info_delete(node->data);
+
+    if(this->root == node)
+    {
+        free(this->root);
+        this->root = NULL;
+    }
+
+    else
+    {
+        free(node);
+    }
+}
+
 void rb_tree_test(rb_tree_t *this)
 {
     printf("\nTEST\n");
@@ -320,6 +348,7 @@ void rb_tree_delete(rb_tree_t *this,int id)
     {
         temp = temp->right;
     }
+
     if(temp->left != NULL)
     {
         temp->left->parent = temp->parent;

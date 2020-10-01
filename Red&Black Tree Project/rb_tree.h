@@ -23,6 +23,7 @@ rb_tree_t *rb_tree_create();
 void rb_tree_init(rb_tree_t *this,void (*display)(void*),void (*delete)(void*));
 void rb_tree_deinit(rb_tree_t *this);
 void rb_tree_destroy(rb_tree_t *this);
+void rb_tree_destroy_helper(rb_tree_t *this, rb_tree_node_t *node);
 void rb_tree_add(rb_tree_t *this, void *data);
 void add_fix(rb_tree_t *this, rb_tree_node_t *node);
 void right_rotate(rb_tree_t *this, rb_tree_node_t *node);
